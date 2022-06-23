@@ -1,0 +1,42 @@
+SUMMARY
+========
+
+PARAMETERS
+ * /differential_drive_parameters/d: 0.729374
+ * /differential_drive_parameters/gear: 162.0
+ * /differential_drive_parameters/max_wheel_speed: 1.47
+ * /differential_drive_parameters/r_left: 0.127031
+ * /differential_drive_parameters/r_right: 0.131235
+ * /rosdistro: melodic
+ * /rosversion: 1.14.13
+ * /viob_application/canbus: can0
+ * /viob_application/dcf: /erf/workspace/ou...
+
+NODES
+  /
+    diff_drive_platform_main (diff_drive_platform/diff_drive_platform_main)
+    teleop (teleop_twist_keyboard/teleop_twist_keyboard.py)
+    viob_application (coapp/viob_application)
+
+auto-starting new master
+process[master]: started with pid [92]
+ROS_MASTER_URI=http://localhost:11311
+
+setting /run_id to 1f53307e-f2cb-11ec-b841-0242ac110002
+process[rosout-1]: started with pid [103]
+started core service [/rosout]
+process[viob_application-2]: started with pid [106]
+terminate called after throwing an instance of 'std::system_error'
+  what():  CanController: No such device
+================================================================================REQUIRED process [viob_application-2] has died!
+process has died [pid 106, exit code -6, cmd /erf/workspace/output/install/coapp/lib/coapp/viob_application __name:=viob_application __log:=/root/.ros/log/1f53307e-f2cb-11ec-b841-0242ac110002/viob_application-2.log].
+log file: /root/.ros/log/1f53307e-f2cb-11ec-b841-0242ac110002/viob_application-2*.log
+Initiating shutdown!
+================================================================================
+process[diff_drive_platform_main-3]: started with pid [111]
+RLException: cannot add process [teleop-4] after process monitor has been shut down
+The traceback for the exception was written to the log file
+[diff_drive_platform_main-3] killing on exit
+[viob_application-2] killing on exit
+root@ada33152e261:/erf/workspace#
+C:\Users\fredv>
