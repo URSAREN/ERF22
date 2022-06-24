@@ -63,7 +63,12 @@ def take_action():
     state_description = ''
     
     d = 1.5
-    
+   # state_dict_ = {
+   # 0: 'find the wall',
+   # 1: 'turn left',
+   # 2: 'follow the wall',
+   #     }
+
     if regions['front'] > d and regions['fleft'] > d and regions['fright'] > d:
         state_description = 'case 1 - nothing'
         change_state(0)
