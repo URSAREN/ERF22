@@ -4,7 +4,7 @@
 #include <ros/time.h>
 #include <sensor_msgs/Range.h>
 
-#define SONAR_NUM 4      // The number of sensors.
+#define SONAR_NUM 2      // The number of sensors.
 #define MAX_DISTANCE 200 // Mad distance to detect obstacles.
 #define PING_INTERVAL 33 // Looping the pings after 33 microseconds.
 
@@ -20,13 +20,9 @@ uint8_t oldSensorReading[SONAR_NUM]; // Store last valid value of the sensors.
 
 uint8_t leftFrontSensor; // Store raw sensor's value.
 uint8_t leftBackSensor;
-uint8_t centerSensor;
-uint8_t rightSensor;
 
 uint8_t leftFrontSensorKalman; // Store filtered sensor's value.
 uint8_t leftBackSensorKalman;
-uint8_t centerSensorKalman;
-uint8_t rightSensorKalman;
 
 /*
  * // Trigger pin, echo pin, and max distance to ping.
@@ -35,8 +31,6 @@ uint8_t rightSensorKalman;
 NewPing sonar[SONAR_NUM] = {
     NewPing(4, 5, MAX_DISTANCE), // leftFront
     NewPing(2, 3, MAX_DISTANCE),   // leftBack
-    NewPing(6, 7, MAX_DISTANCE),   // center
-    NewPing(8, 9, MAX_DISTANCE)    // right
 };
 
 /*
@@ -48,8 +42,6 @@ NewPing sonar[SONAR_NUM] = {
 */
 SimpleKalmanFilter KF_LeftFront(2, 2, 0.01);
 SimpleKalmanFilter KF_LeftBack(2, 2, 0.01);
-SimpleKalmanFilter KF_Center(2, 2, 0.01);
-SimpleKalmanFilter KF_Right(2, 2, 0.01);
 
 ros::NodeHandle nh; // create an object which represents the ROS node.
 
@@ -83,8 +75,6 @@ void oneSensorCycle()
 {
   leftFrontSensor = returnLastValidRead(0, cm[0]);
   leftBackSensor = returnLastValidRead(1, cm[1]);
-  centerSensor = returnLastValidRead(2, cm[2]);
-  rightSensor = returnLastValidRead(3, cm[3]);
 }
 
 // If sensor value is 0, then return the last stored value different than 0.
@@ -105,8 +95,6 @@ void applyKF()
 {
   leftFrontSensorKalman = KF_LeftFront.updateEstimate(leftFrontSensor);
   leftBackSensorKalman = KF_LeftBack.updateEstimate(leftBackSensor);
-  centerSensorKalman = KF_Center.updateEstimate(centerSensor);
-  rightSensorKalman = KF_Right.updateEstimate(rightSensor);
 }
 
 void startTimer()
@@ -131,14 +119,10 @@ void us_sensor_msg_init(sensor_msgs::Range &range_name, char *frame_id_name)
 // Create instances for range messages.
 sensor_msgs::Range range_leftFront;
 sensor_msgs::Range range_leftBack;
-sensor_msgs::Range range_center;
-sensor_msgs::Range range_right;
 
 // Create publisher onjects for all sensors
 ros::Publisher pub_range_leftFront("/ultrasound_leftFront", &range_leftFront);
 ros::Publisher pub_range_leftBack("/ultrasound_leftBack", &range_leftBack);
-ros::Publisher pub_range_center("/ultrasound_center", &range_center);
-ros::Publisher pub_range_right("/ultrasound_right", &range_right);
 
 void setup()
 {
@@ -149,13 +133,9 @@ void setup()
   nh.initNode();
   nh.advertise(pub_range_leftFront);
   nh.advertise(pub_range_leftBack);
-  nh.advertise(pub_range_center);
-  nh.advertise(pub_range_right);
 
   us_sensor_msg_init(range_leftFront, "/ultrasound_leftFront");
   us_sensor_msg_init(range_leftBack, "/ultrasound_leftBack");
-  us_sensor_msg_init(range_center, "/ultrasound_center");
-  us_sensor_msg_init(range_right, "/ultrasound_right");
 }
 
 void loop()
@@ -167,18 +147,12 @@ void loop()
     applyKF();
     range_leftFront.range = leftFrontSensorKalman;
     range_leftBack.range = leftBackSensorKalman;
-    range_center.range = centerSensorKalman;
-    range_right.range = rightSensorKalman;
 
     range_leftFront.header.stamp = nh.now();
     range_leftBack.header.stamp = nh.now();
-    range_center.header.stamp = nh.now();
-    range_right.header.stamp = nh.now();
 
     pub_range_leftFront.publish(&range_leftFront);
     pub_range_leftBack.publish(&range_leftBack);
-    pub_range_center.publish(&range_center);
-    pub_range_right.publish(&range_right);
 
     startTimer();
   }
