@@ -74,7 +74,7 @@ void echoCheck()
 void oneSensorCycle()
 {
   centerSensor = returnLastValidRead(0, cm[0]);
-  rightSensor = returnLastValidRead(0, cm[0]);
+  rightSensor = returnLastValidRead(1, cm[1]);
 }
 
 // If sensor value is 0, then return the last stored value different than 0.
