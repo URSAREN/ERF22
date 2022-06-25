@@ -8,7 +8,7 @@
         <param name="angle_compensate"    type="bool"   value="true"/>
     </node>
 
-    <node pkg="dumb_wall_follower" name="main_node" type="main_node.py" output="screen">
+    <node pkg="dumb_wall_follower" name="test_node" type="test_node.py" output="screen">
     </node>
 
 
