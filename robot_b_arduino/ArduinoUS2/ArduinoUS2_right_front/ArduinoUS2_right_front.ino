@@ -126,6 +126,9 @@ ros::Publisher pub_range_right("/ultrasound_right", &range_right);
 
 void setup()
 {
+
+  Serial.begin(9600);
+  
   pingTimer[0] = millis() + 75;
   for (uint8_t i = 1; i < SONAR_NUM; i++)
     pingTimer[i] = pingTimer[i - 1] + PING_INTERVAL;
@@ -147,6 +150,9 @@ void loop()
     applyKF();
     range_center.range = centerSensorKalman;
     range_right.range = rightSensorKalman;
+
+    Serial.print(centerSensorKalman);
+    Serial.print(rightSensorKalman);
 
     range_center.header.stamp = nh.now();
     range_right.header.stamp = nh.now();
