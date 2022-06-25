@@ -126,6 +126,8 @@ ros::Publisher pub_range_leftBack("/ultrasound_leftBack", &range_leftBack);
 
 void setup()
 {
+  Serial.begin(9600);
+  
   pingTimer[0] = millis() + 75;
   for (uint8_t i = 1; i < SONAR_NUM; i++)
     pingTimer[i] = pingTimer[i - 1] + PING_INTERVAL;
@@ -147,6 +149,9 @@ void loop()
     applyKF();
     range_leftFront.range = leftFrontSensorKalman;
     range_leftBack.range = leftBackSensorKalman;
+
+    Serial.print(leftFrontSensorKalman);
+    Serial.print(leftBackSensorKalman);
 
     range_leftFront.header.stamp = nh.now();
     range_leftBack.header.stamp = nh.now();
