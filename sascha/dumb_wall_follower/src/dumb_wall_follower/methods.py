@@ -156,6 +156,7 @@ def check_threshold(value_is, value_should, thresh):
         return False
 
 def determine_turn_direction(laser_scan_msg, robot_angle_to_wall, wall_distance_required, distance_threshold=0.1, angles=[90, 45, 0]):
+    # TODO: rewrite for new cases (when robot will ride back -> the directions will be switched.) i.e. test if it is already functions.
     """
     Determines what type of turn to make. Suitable for 3 measurements.
 

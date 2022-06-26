@@ -30,7 +30,54 @@ class Robot():
         self.current_wall_location = 'left'
 
         self.tf_listener = tf.TransformListener()
+
+    def main_structure(self):
+        """
+        Main logic of the robot.
+        """
+
+        #Code abstract:
+        """
+        1. Initialization
+        2. Scan and find a point with the smallest range (in the valid area in front of the robot.)
+        3. Orient itself to this point.
+        4. Do values from d1 +- 30 deg  ~equal?
+            4.1 Yes -> wall found -> move to this point(up untill safe distance to wall).
+            4.2 No -> exception -> rotate 180 deg left -> go to 2.
+        5. Rotate 90 deg right.
+        6. Initial wall following
+            6.0 determine_turn_direction()
+                6.0.1 If None -> jump to 6.1
+                6.0.2 If coming_right -> reduce speed -> jump to 6.1
+                6.0.3 if right -> stop -> rotate 90 deg right -> jump to 6.
+                6.0.4 if coming_left -> reduce speed -> dumb PoseGoal (directly in front) for move_base -> jump to 6.0.5
+                6.0.5 while not left -> dumb PoseGoal (directly in front) with reduced speed. -> 6.0.6
+                6.0.6 Rotate 90 deg left around edge (move base command possible??). -> 6.0.7
+                6.0.7 Update internal corner map location. -> 7.
+            6.1 measure_distances_to_wall() for d3 left and d2 left.
+            6.2 calculate_position_error_laser_frame().
+            6.3 laser2base()
+            6.4 Send point from 6.3 to move_base.
+        7. Send True to /robotA_in_tunnel
+        8. Wall following
+            8.0 Check internal corner map location -> ??????
+
+            8.1 determine_turn_direction()
+                8.1.0 If None -> 8.2
+                8.1.1 If coming_left -> reduce speed -> dump PoseGoal (directly in front) for move_base
+                8.1.2 If coming_right -> reduce speed -> 8.2
+                8.1.3 If left -> stop -> rotate 90 deg left around edge -> update internal corner map location -> 8.
+                8.1.4 If right -> stop -> rotate 90 deg right -> update internal corner map location -> 8.
         
+            8.2 measure_distances_to_wall() for d3 left and d2 left.
+            8.2 calculate_position_error_laser_frame().
+            8.3 laser2base()
+            8.4 Send point from 6.3 to move_base
+
+
+
+
+        """        
 
     def measure_distances_to_wall(self, laser_scan_msg):
         """
