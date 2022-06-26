@@ -1,4 +1,4 @@
-from msilib.schema import Error
+#! /usr/bin/env python3
 import rospy 
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
@@ -53,20 +53,20 @@ def calculate_relative_angle_to_wall(d3_measured, d2_measured):
         d3_ideal = distance_to_wall
 
         if current_wall_location == 'left':
-            if d3_ideal <= d3_measured <= d2_ideal:
+            if d3_ideal <= d3_measured <= d2_ideal and d2_measured >= d2_ideal:
                 return math.acos(distance_to_wall / d3_measured)
             elif d3_measured >= d3_ideal and d2_ideal <= d2_measured <= d3_ideal:
                 return -math.acos(distance_to_wall / d3_measured)
             else:
-                raise NotImplementedError('Rotation angle is too big.')
+                return None
 
         elif current_wall_location == 'right':
-            if d3_ideal <= d3_measured <= d2_ideal:
+            if d3_ideal <= d3_measured <= d2_ideal and d2_measured >= d2_ideal:
                 return -math.acos(distance_to_wall / d3_measured)
             elif d3_measured >= d3_ideal and d2_ideal <= d2_measured <= d3_ideal:
                 return math.acos(distance_to_wall / d3_measured)
             else:
-                raise NotImplementedError('Rotation angle is too big.')
+                return None
 
         else:
             raise NotImplementedError('False wall location was given. Only "right" or "left".')

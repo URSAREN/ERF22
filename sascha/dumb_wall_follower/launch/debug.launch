@@ -1,4 +1,8 @@
 <launch>
+
+    <!-- Transformation Configuration ... Setting Up the Relationships Between Coordinate Frames --> 
+    <node pkg="tf2_ros" type="static_transform_publisher" name="base_link_to_laser" args="0.125 0 0.05 0 0 0 base_link laser" />
+
     <node name="rplidarNode"          pkg="rplidar_ros"  type="rplidarNode" output="screen">
         <param name="serial_port"         type="string" value="/dev/ttyUSB0"/>
         <param name="serial_baudrate"     type="int"    value="115200"/><!--A1/A2 -->
@@ -8,7 +12,7 @@
         <param name="angle_compensate"    type="bool"   value="true"/>
     </node>
 
-    <node pkg="dumb_wall_follower" name="test_node" type="test_node.py" output="screen">
+    <node pkg="dumb_wall_follower" name="test" type="main_node.py" output="screen">
     </node>
 
 
