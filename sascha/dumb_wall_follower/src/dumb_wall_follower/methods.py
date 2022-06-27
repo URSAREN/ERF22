@@ -237,4 +237,29 @@ def determine_turn_direction(laser_scan_msg, robot_angle_to_wall, wall_distance_
         return "error"
 
 
+def get_shortest_distance(laser_scan_msg):
+    """
+    Determines the shortest distance in the valid area in front of the robot
+
+    :param laser_scan_msg: A LaserScan msg from lidar
+    :type laser_scan_msg: nav_msgs.LaserScan
+
+    return: angle in radians
+
+    :rtype: float64
+    """
+    distances = np.asarray(laser_scan_msg.ranges)
+    angle_step = 360 / len(distances)
+    left_border = math.radians(100)
+    right_border = math.radians(-100)
+
+    s_dist_index = left_border
+    s_dist = 0 #TODO fix
+    for i in range(left_border, right_border):
+        if distances[i] < s_dist:
+            s_dist = distances[i]
+            s_dist_index = i
+
+    return s_dist_index * angle_step
+
 

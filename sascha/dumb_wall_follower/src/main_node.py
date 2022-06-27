@@ -1,3 +1,4 @@
+#! /usr/bin/env python3
 import rospy 
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
@@ -35,6 +36,18 @@ class Robot():
         """
         Main logic of the robot.
         """
+        
+        angle = get_shortest_distance()
+        # orientate to angle
+        scan_gap = 30
+        dl = range_by_angle_from_laser_scan(laserscan, scan_gap)
+        dr = range_by_angle_from_laser_scan(laserscan, -scan_gap)
+        if (abs(dl-dr) > 0.2):
+            # turn 180 degree
+            dl = range_by_angle_from_laser_scan(laserscan, scan_gap)
+            dr = range_by_angle_from_laser_scan(laserscan, -scan_gap)
+        # drive to wall (+ 60 cm distance)
+        # rotate 90 degree right
 
         #Code abstract:
         """
@@ -73,10 +86,6 @@ class Robot():
             8.2 calculate_position_error_laser_frame().
             8.3 laser2base()
             8.4 Send point from 6.3 to move_base
-
-
-
-
         """        
 
     def measure_distances_to_wall(self, laser_scan_msg):
