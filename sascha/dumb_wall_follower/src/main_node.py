@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+from ast import While
 import rospy 
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
@@ -32,22 +33,48 @@ class Robot():
 
         self.tf_listener = tf.TransformListener()
 
-    def main_structure(self):
+    def main_structure(self, laser_scan_msg):
         """
         Main logic of the robot.
         """
         
-        angle = get_shortest_distance()
+        dist, angle = get_shortest_distance(laser_scan_msg)
         # orientate to angle
         scan_gap = 30
-        dl = range_by_angle_from_laser_scan(laserscan, scan_gap)
-        dr = range_by_angle_from_laser_scan(laserscan, -scan_gap)
-        if (abs(dl-dr) > 0.2):
+        dl = range_by_angle_from_laser_scan(laser_scan_msg, scan_gap)
+        dr = range_by_angle_from_laser_scan(laser_scan_msg, -scan_gap)
+        if (abs(dl-dr) > 0.2 * dl):
             # turn 180 degree
-            dl = range_by_angle_from_laser_scan(laserscan, scan_gap)
-            dr = range_by_angle_from_laser_scan(laserscan, -scan_gap)
+            dl = range_by_angle_from_laser_scan(laser_scan_msg, scan_gap)
+            dr = range_by_angle_from_laser_scan(laser_scan_msg, -scan_gap)
         # drive to wall (+ 60 cm distance)
         # rotate 90 degree right
+
+        left_turns = 0
+        while True:
+            turn_direction = determine_turn_direction()
+            if turn_direction == 'left':
+                if left_turns == 0:
+                    self.last_corner_id = 3
+                    tunnel_blocker(True)
+                left_turns += 1
+                pass
+            elif turn_direction == 'coming_right':
+                tunnel_blocker(False)
+                pass
+            elif turn_direction == 'right':
+                pass
+            elif turn_direction == 'coming_left':
+                # reduce speed
+                pass
+            else:
+                pass
+            d3, d2, d1 = self.measure_distance_to_wall()
+            lin_error, ang_error = self.calculate_position_error_laser_frame(d3,d2)
+            wall_move_goal = self.laser2base(lin_error,ang_error)
+            #send to movebase
+            #update cornermap
+
 
         #Code abstract:
         """
@@ -213,7 +240,7 @@ class Robot():
         else:
             raise NotImplementedError('False wall location was given. Only "right" or "left".')
 
-    def laser2base(self, linear_error, angular_error):
+    def laser2base_error(self, linear_error, angular_error):
         """
         Converts linear and angular errors from laser to base_link frame.
 
@@ -239,8 +266,7 @@ class Robot():
         my_pose.orientation.w = q[3]
 
         transformed_pose = self.transform_pose(my_pose, 'laser', 'base_link')
-        print (f"Position of the error in the base_link: {transformed_pose}")
-
+        return transformed_pose
     
     @staticmethod
     def transform_pose(input_pose, from_frame, to_frame):
@@ -266,6 +292,12 @@ class Robot():
 
 
 def scan_callback(laser_scan_msg):
+    rotation_out = 0.1
+    corner_map = [[-90, 0],[-90, 0], [90, 'auto_computed_corner'],
+    [90, 'auto_computed_corner'], [90, 'auto_computed_corner'], [-90, 0],
+    [-180, 0], [90, 0], [-90, 'auto_computed_corner'], 
+    [-90, 'auto_computed_corner'], [-90, 'auto_computed_corner'], [90, 0],
+    [90, 0]]
     robotA = Robot(name='RobotA', corner_map=[])
     d3_measured, d2_measured, d1_measured = robotA.measure_distances_to_wall(laser_scan_msg)
     print('######################')

@@ -1,5 +1,7 @@
 import numpy as np 
 import math
+import rospy
+from std_msgs.msg import Bool
 
 def pol2cart(d, angle):
     """
@@ -237,29 +239,44 @@ def determine_turn_direction(laser_scan_msg, robot_angle_to_wall, wall_distance_
         return "error"
 
 
-def get_shortest_distance(laser_scan_msg):
+def get_shortest_distance(laser_scan_msg, left_border=100, right_border=-100):
     """
     Determines the shortest distance in the valid area in front of the robot
 
     :param laser_scan_msg: A LaserScan msg from lidar
     :type laser_scan_msg: nav_msgs.LaserScan
 
-    return: angle in radians
+    return: distance and angle in radians
 
-    :rtype: float64
+    :rtype: list
     """
+    angle_min = 0.0
+    angle_max = float(laser_scan_msg.angle_max) - float(laser_scan_msg.angle_min)  # 360
+    range_min = float(laser_scan_msg.range_min)
+    range_max = float(laser_scan_msg.range_max)
+    angle_increment = float(laser_scan_msg.angle_increment)
     distances = np.asarray(laser_scan_msg.ranges)
-    angle_step = 360 / len(distances)
-    left_border = math.radians(100)
-    right_border = math.radians(-100)
 
-    s_dist_index = left_border
-    s_dist = 0 #TODO fix
-    for i in range(left_border, right_border):
-        if distances[i] < s_dist:
-            s_dist = distances[i]
-            s_dist_index = i
+    # angle = -angle # due to laser scan being in opposite direction.
 
-    return s_dist_index * angle_step
+    if angle < -180 or angle > 180:
+        print('Provided angle is out of bounds of [-180, 180]')
+        return None
+    angle = math.radians(angle+180)
 
 
+
+    # Angle probably is in between two points, so will return average of 2 nearest measurements
+    angle_id_left = int((left_border - angle_min) / angle_increment)
+    angle_id_right = int((right_border - angle_min) / angle_increment)
+
+    min_dist = min(distances[angle_id_left:angle_id_right])
+    min_angle= np.argmin(distances[angle_id_left:angle_id_right]) * angle_increment
+    min_angle = -(min_angle - 180)
+
+    return [min_dist, min_angle]
+
+
+def tunnel_blocker(state: bool):
+    p = rospy.Publisher('/tunnel_state', Bool, queue_size=1)
+    p.publish(state)
