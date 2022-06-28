@@ -1,0 +1,6 @@
+corner_map : [[-90, 0], [-90, 0], [90, 'auto_computed_corner'], [90, 'auto_computed_corner'], [90, 'auto_computed_corner'], 
+  [-90, 0], [-180, 0], [90, 0], [-90, 'auto_computed_corner'], [-90, 'auto_computed_corner'], [-90, 'auto_computed_corner'], [90, 0], [90, 0]]
+
+max_linear_speed: 0.2 # m/s
+max_angular_speed: 0.07 # rad/s
+

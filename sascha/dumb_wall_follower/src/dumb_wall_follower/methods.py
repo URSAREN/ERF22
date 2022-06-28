@@ -257,15 +257,6 @@ def get_shortest_distance(laser_scan_msg, left_border=100, right_border=-100):
     angle_increment = float(laser_scan_msg.angle_increment)
     distances = np.asarray(laser_scan_msg.ranges)
 
-    # angle = -angle # due to laser scan being in opposite direction.
-
-    if angle < -180 or angle > 180:
-        print('Provided angle is out of bounds of [-180, 180]')
-        return None
-    angle = math.radians(angle+180)
-
-
-
     # Angle probably is in between two points, so will return average of 2 nearest measurements
     angle_id_left = int((left_border - angle_min) / angle_increment)
     angle_id_right = int((right_border - angle_min) / angle_increment)

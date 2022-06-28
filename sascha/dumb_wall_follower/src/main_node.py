@@ -1,5 +1,4 @@
-#! /usr/bin/env python3
-from ast import While
+from re import I
 import rospy 
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
@@ -14,24 +13,53 @@ import tf2_ros
 class Robot():
     def __init__(self, name, corner_map):
         self.name = name
-        self.corner_map = corner_map
+        self.corner_map = np.asarray(rospy.get_param('~corner_map'))
         self.last_corner_id = None
         self.corner_automaton_state = None
 
-        # self.node = rospy.init_node(self.name, anonymous=True)
-        # self.velocity_publisher = rospy.Publisher('/cmd_vel', Twist)
-        # self.laser_subscriber = rospy.Subscriber("/scan", LaserScan, self.scan_callback)
-
-        self.max_linear_speed = 0.2 # m/s
-        self.max_angular_speed = 0.1 # rad/s
-        self.distance_to_wall = 0.4 # m
+        self.max_linear_speed = rospy.get_param('~max_linear_speed') # m/s
+        self.max_angular_speed = rospy.get_param('~max_angular_speed')  # rad/s
+        self.distance_to_wall = rospy.get_param('~distance_to_wall') # m
         self.sensor_position = 0  # distance from sensor's center to robot's center in [m]
 
         self.angles_left_wall_follow = [90, 60, 0] # d3, d2, d1 in deg
         self.angles_right_wall_follow = [-90, -50, 0] # d3, d2, d1 in deg
         self.current_wall_location = 'left'
 
+        rospy.init_node(self.name, anonymous=True)
         self.tf_listener = tf.TransformListener()
+        
+        self.goal_pose_publisher = rospy.Publisher('/move_base_simple/goal', PoseStamped)
+
+    def init_listener(self):
+        """
+        
+        """
+        rospy.Subscriber("/scan", LaserScan, self.main_structure)
+        rospy.spin()
+
+    def get_to_initial_pose(self, laser_scan_msg):
+        # dist, angle = get_shortest_distance(laser_scan_msg)
+        dist = 0
+        angle = math.radians(90)
+        x_shortest, y_shortest = pol2cart(dist, angle)
+
+        my_pose = Pose()
+
+
+        my_pose.position.x = x_shortest
+        my_pose.position.y = y_shortest
+        my_pose.position.z = 0
+
+        q = quaternion_from_euler(0, 0, angle)
+        my_pose.orientation.x = q[0]
+        my_pose.orientation.y = q[1]
+        my_pose.orientation.z = q[2]
+        my_pose.orientation.w = q[3]
+
+        self.goal2move_base(my_pose)
+
+
 
     def main_structure(self, laser_scan_msg):
         """
@@ -141,18 +169,18 @@ class Robot():
 
 
     
-    def adjust_parallel_to_wall(self, laser_scan_msg):
-        """
-        Adjust the robot velocities to reduce difference between d3 and d2.
+    # def adjust_parallel_to_wall(self, laser_scan_msg):
+    #     """
+    #     Adjust the robot velocities to reduce difference between d3 and d2.
 
-        :param laser_scan_msg: A LaserScan msg from lidar
-        :type laser_scan_msg: nav_msgs.LaserScan
+    #     :param laser_scan_msg: A LaserScan msg from lidar
+    #     :type laser_scan_msg: nav_msgs.LaserScan
 
-        """
+    #     """
         
-        d3_measured, d2_measured, d1_measured = self.measure_distances_to_wall(laser_scan_msg)
-        relative_angle = self.calculate_relative_angle_to_wall(d3_measured, d2_measured)
-        linear_error, angular_error = self.calculate_position_error(d3_measured, d2_measured)
+    #     d3_measured, d2_measured, d1_measured = self.measure_distances_to_wall(laser_scan_msg)
+    #     relative_angle = self.calculate_relative_angle_to_wall(d3_measured, d2_measured)
+    #     linear_error, angular_error = self.calculate_position_error(d3_measured, d2_measured)
 
 
 
@@ -287,44 +315,31 @@ class Robot():
 
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
             raise
+
+    def goal2move_base(self, goal_pose_in_robot_frame):
+        """
+        Send dumb command to move_base to test if it is working.
+
+        :param goal_pose_in_robot_frame: Pose for the robot to move to.
+        :type goal_pose_in_robot_frame: geometry_msgs/Pose
+
+
+        """
+
+
+        pose_stamped = PoseStamped()
+        pose_stamped.header.frame_id = 'base_link'
+        pose_stamped.pose = goal_pose_in_robot_frame
+        print(f'Sending following to move_base: {pose_stamped}')
+
+        # rospy.init_node('dumb_command_publisher', anonymous=True)
+        # goal_pose_publisher = rospy.Publisher('/move_base_simple/goal', PoseStamped)
+        my_twist = Twist()
+        my_twist.angular.z = 0.5
+        self.goal_pose_publisher.publish(pose_stamped)
+    
         
-
-
-
-def scan_callback(laser_scan_msg):
-    rotation_out = 0.1
-    corner_map = [[-90, 0],[-90, 0], [90, 'auto_computed_corner'],
-    [90, 'auto_computed_corner'], [90, 'auto_computed_corner'], [-90, 0],
-    [-180, 0], [90, 0], [-90, 'auto_computed_corner'], 
-    [-90, 'auto_computed_corner'], [-90, 'auto_computed_corner'], [90, 0],
-    [90, 0]]
-    robotA = Robot(name='RobotA', corner_map=[])
-    d3_measured, d2_measured, d1_measured = robotA.measure_distances_to_wall(laser_scan_msg)
-    print('######################')
-    print(f'd3 measured is: {d3_measured}')
-    print(f'd2 measured is: {d2_measured}')
-    print(f'd1 measured is: {d1_measured}')
-    ang_to_wall = robotA.calculate_relative_angle_to_wall(d3_measured, d2_measured)
-    print(f'Relative angle to wall is: {math.degrees(ang_to_wall)}')
-    lin_error, ang_error = robotA.calculate_position_error_laser_frame(d3_measured, d2_measured)
-    print(f'Linear position error LASER is: {lin_error}')
-    print(f'Angular position error LASER is: {math.degrees(ang_error)}')
-
-    robotA.laser2base(lin_error, ang_error)
-
-    
-
-
-
-
-
-    
-
-def listener():
-    rospy.init_node('laser_scan_listener', anonymous=True)
-    rospy.Subscriber("/scan", LaserScan, scan_callback)
-    rospy.spin()
-
-
 if __name__ == '__main__':
-    listener()
+    corner_map_a = rospy.get_param('/corner_map')
+    robotA = Robot()
+    robotA.initiate_listener()
