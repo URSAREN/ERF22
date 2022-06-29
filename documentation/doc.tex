@@ -23,9 +23,9 @@
 	
 	\section{Abstract}
 	
-	Our solution to the LELY Challenge consists of a team of asymmetrical robots implemented in ROS. Robot A navigates and maps its environment with use of a 2D LIDAR system. Robot B recieves a map of the environment and location data from Robot A and then uses its 3 ultrasonic sensors to navigate. \newline
+	Our envisioned solution to the LELY Challenge consists of a team of asymmetrical robots with a control system implemented in ROS 1. Robot A navigates and maps its environment with use of a 2D LIDAR system. Robot B recieves a map of the environment and location data from Robot A and then uses its ultrasonic sensors to navigate its environment.\newline
 	
-	This document provides an outline of the design of the systems and the thought process behind their development.	
+	This document provides an outline of the design of the systems and the thought process behind their development.
 	
 	\section{Robot A}
 	
@@ -44,7 +44,7 @@
 	The A1M8-R6 was chosen due to its excellent support in the ROS ecosystem, allowing for the implementation of a straightfoward mapping stack. 
 	
 	\subsection{Hardware}
-	A 3D-printed mount was created for easy placement and adjustment of the LIDAR.
+	A 3D-printed mount was created for easy placement and adjustment of the LIDAR. It consists of two parts: the baseplate, which is directly connected to the sensor, and the connector plate, which is taped on the lower platform of the Juno. Both plates are connected through two screws, which form a one degree of freedom joint. This allows the horizontal adjustment of the baseplate, to gain more accurate data from the LIDAR. 
 	
 	\begin{figure}[h!]
 		\centering
@@ -53,9 +53,9 @@
 	\end{figure}
 	
 	\subsection{Software}
-	The A1M8-R6 LIDAR comes with ROS packages which allow for SLAM mapping without odometry information up to 12 meters. An ideal navigation stack for Robot A would be to use the gmapping ROS package to generate a cost map, allowing for the robot to be steered via the ROS move\_base package. \newline
+	The A1M8-R6 LIDAR comes with ROS packages which allow for SLAM mapping without odometry information up to 12 meters. An ideal navigation stack for Robot A would be to use the gmapping ROS package to generate a cost map, allowing for the robot to be steered via the ROS move\_base package. However, due to technical difficulties with move\_base, debugging and testing of this algorithem was not possible. \newline
 	
-	However, due to technical difficulties with move\_base, Robot A implements a wall following and corner detection algorithem. Five equally-spaced lines in front of the robot are sampled via LIDAR allowing it to maintain a constant distance to walls and to count and detect corners. Diffrerentiating between corners with right turns and left turns allow the robot to locate itself in a predefined map with uncertain wall lengths.\newline
+	Attempts at remediating this were unsuccessful within the given time frame.
 	
 	\pagebreak
 
@@ -71,12 +71,18 @@
 	\end{figure}
 	
 	\subsection{Sensors}
-	Three HC-SR04 ultrasonic sensors are placed in an array around the robot. The sensors interface with the laptop via an Arduino Uno.
+	Three HC-SR04 ultrasonic sensors are placed in an array infront of the robot. The sensors interface with the laptop via an Arduino Uno. \newline
+	
+	A problem faced whilst designing the sensor array was throughput limitations on the Arduino. A single HC-SR04 requires two digital pins for input-output, allowing for a maximum of three sensors per Arduino, as opposed to the originally planned five. \newline
 	
 	\subsection{Hardware}
-	An aluminium frame with 3D-printed connection points extends from the top mounting point to the bottom of the robot, allowing the sensors to attach to a low-enough point to read the walls of the maze.
+	The sensor mounting for Robot B was far more complicated, because it has a complete casing. For this reason, an aluminum frame existing of four edge tubes with 3D-printed connection points extends from the top mounting point to the bottom of the robot, allowing the sensors to attach to a low-enough point to read the walls of the maze.\newline
 	
-	\pagebreak
+	For more accurate sensor data, the ultrasonic sensors should be at the same height as the LIDAR. To implement this, the perpendicular tube is adjustable in height through a clamping mechanism in the connector to the horizontal tube. \newline
+	
+	To mount all the ultrasonic sensors in a flexible configuration, the mount consists of four different components. Through them, it is possible to adjust the angle and the level of the sensors. \newline
+	
+	Additionally, they can be easily installed in other configurations or removed for testing reasons.
 	
 	\begin{figure}[h!]
 		\centering
@@ -99,6 +105,8 @@
 	\pagebreak
 	
 	\subsection{Software}
-	Robot B follows a similar algorithem to the ideal case of Robot A. After being located by Robot A and having recieved the LIDAR map, Robot B uses a wall following and corner counting algorithem.
+	The ideal algorithem for Robot B is similar to the ideal case of Robot A. After being having recieved the LIDAR map and its own position and orientation from Robot A, Robot B uses a wall following and corner counting algorithem to navigate. \newline
+	
+	This was not realised due to the previous mentioned troubles whilst developing the code for Robot A.
 	
 \end{document}
