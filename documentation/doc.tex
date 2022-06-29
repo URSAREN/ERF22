@@ -14,6 +14,9 @@
 % Images
 \graphicspath{ {./images/} }
 
+% Hyperlinks
+\usepackage{hyperref}
+
 \title{RWTH Aachen University - LELY Solution Documentation}
 \author{RWTH Team}
 \date{\today}
@@ -25,7 +28,12 @@
 	
 	Our envisioned solution to the LELY Challenge consists of a team of asymmetrical robots with a control system implemented in ROS 1. Robot A navigates and maps its environment with use of a 2D LIDAR system. Robot B recieves a map of the environment and location data from Robot A and then uses its ultrasonic sensors to navigate its environment.\newline
 	
-	This document provides an outline of the design of the systems and the thought process behind their development.
+	This document provides an outline of the design of the systems and the thought process behind their development. \newline
+	
+	All code, CAD files, and this document itself are available at the following GitHub repository: \href{https://github.com/URSAREN/ERF22}{https://github.com/URSAREN/ERF22} 
+	\newline
+	\newline
+	Further explanatory comments are included in the source code files.
 	
 	\section{Robot A}
 	
