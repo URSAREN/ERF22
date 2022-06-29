@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/W32TeX) (preloaded format=pdflatex 2022.5.11)  29 JUN 2022 20:26
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/W32TeX) (preloaded format=pdflatex 2022.5.11)  29 JUN 2022 21:55
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -289,18 +289,14 @@ File: ./images/lidar_mount.png Graphic file (type png)
 <use ./images/lidar_mount.png>
 Package pdftex.def Info: ./images/lidar_mount.png  used on input line 59.
 (pdftex.def)             Requested size: 318.29156pt x 219.52182pt.
+[1
 
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-
+{c:/texlive/2020/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
 Underfull \hbox (badness 10000) in paragraph at lines 64--65
 
  []
 
-[1
-
-{c:/texlive/2020/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2 <./images/ro
-bot_a.jpg> <./images/lidar_mount.PNG>] [3]
+[2 <./images/robot_a.jpg> <./images/lidar_mount.PNG>] [3]
 <./images/robot_b_full.jpg, id=72, 2071.74pt x 2428.07124pt>
 File: ./images/robot_b_full.jpg Graphic file (type jpg)
 <use ./images/robot_b_full.jpg>
@@ -371,16 +367,16 @@ Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 120.
 Here is how much of TeX's memory you used:
  5350 strings out of 480608
  82639 string characters out of 5907536
- 345296 words of memory out of 5000000
+ 344296 words of memory out of 5000000
  21145 multiletter control sequences out of 15000+600000
  536585 words of font info for 38 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 34i,6n,29p,442b,311s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 34i,6n,29p,446b,334s stack positions out of 5000i,500n,10000p,200000b,80000s
 <c:/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb><c:/tex
 live/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><c:/texlive/2020/
 texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb><c:/texlive/2020/texmf-dist
 /fonts/type1/public/amsfonts/cm/cmr17.pfb>
-Output written on doc.pdf (6 pages, 6962082 bytes).
+Output written on doc.pdf (6 pages, 6962262 bytes).
 PDF statistics:
  115 PDF objects out of 1000 (max. 8388607)
  93 compressed objects within 1 object stream
