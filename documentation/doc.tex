@@ -14,24 +14,34 @@
 % Images
 \graphicspath{ {./images/} }
 
-\title{RWTH Aachen University - LELY Challenge Documentation}
+\title{RWTH Aachen University - LELY Solution Documentation}
 \author{RWTH Team}
 \date{\today}
 
 \begin{document}
 	\maketitle	
 	
+	\section{Abstract}
+	
+	Our solution to the LELY Challenge consists of a team of asymmetrical robots. Robot A navigates and maps its environment with use of a 2D LIDAR system. Robot B recieves a map of the environment from Robot A and then uses its 3 ultrasonic sensors to navigate. \newline
+	
+	This document provides an outline of the design of the systems and the thought process behind their development.	
+	
 	\section{Robot A}
 	
 	\subsection{Overview}
-	Robot A is a LIDAR-capable platform. Due to the walls of the challenge being only 37cm talls, the mounting point of the LIDAR is on the bottom front of the chasis, providing a 200 degree field of view.
+	Robot A is a LIDAR-capable platform. Due to the walls of the challenge being only 37cm tall, the mounting point of the LIDAR is on the bottom front of the chasis, providing a 200 degree field of view. 
 	
-	PICTURE OF COMPLETE ROBOT
+	\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.1]{robot_a}
+		\caption{The LIDAR sensor and 3D-printed mounting point attached to Robot A}
+	\end{figure}
 	
 	\subsection{Sensors}
-	A RPLIDAR A1M8-R6 LIDAR is mounted on the front of the robot. The LIDAR interfaces with the laptop directly over USB. 
+	A RPLIDAR A1M8-R6 LIDAR is mounted on the front of the robot. The LIDAR interfaces with the laptop directly over USB. \newline
 	
-	OFFICIAL PICTURE OF LIDAR
+	The A1M8-R6 was chosen due to its excellent support in the ROS ecosystem, allowing for the implementation of a straightfoward mapping stack. 
 	
 	\subsection{Hardware}
 	A 3D-printed mount was created for easy placement and adjustment of the LIDAR.
@@ -49,21 +59,26 @@
 
 	\section{Robot B}
 	
-	
 	\subsection{Overview}
 	Robot B uses ultrasonic sensors mounted via aluminium frame to navigate its environment.
 	
-	PICTURE OF COMPLETE ROBOT
+	\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.1]{robot_b_full}
+		\caption{Robot B with mounting frame, 3D-printed connectors, and ultrasonic sensors}
+	\end{figure}
 	
 	\subsection{Sensors}
-	Three HC-SR04 ultrasonic sensors are placed ??somewhere?? around the robot. The sensors interface with the laptop via an Arduino Uno.
-	
-	OFFICIAL PICTURES OF SENSOR AND ARDUINO.
+	Three HC-SR04 ultrasonic sensors are placed in an array around the robot. The sensors interface with the laptop via an Arduino Uno.
 	
 	\subsection{Hardware}
 	An aluminium frame with 3D-printed connection points extends from the top mounting point to the bottom of the robot, allowing the sensors to attach to a low-enough point to read the walls of the maze.
 	
-	PICTURE OF FRAME.
+	\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.1]{ultrasonic_mount}
+		\caption{Robot B with mounting frame, 3D-printed connectors, and ultrasonic sensors}
+	\end{figure}
 	
 	\begin{figure}[h]
 		\centering
