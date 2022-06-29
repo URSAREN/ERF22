@@ -30,9 +30,9 @@
 	\section{Robot A}
 	
 	\subsection{Overview}
-	Robot A is a LIDAR-capable platform. Due to the walls of the challenge being only 37cm tall, the mounting point of the LIDAR is on the bottom front of the chasis, providing a 200 degree field of view. The restricted point of view is overcome through the natural turning of the robot during navigation.
+	Robot A is a LIDAR-capable platform. Due to the walls of the challenge being only 37cm tall, the mounting point of the LIDAR is on the bottom front of the chasis, providing a 200 degree field of view. The restricted point of view is overcome through the natural turning of the robot during navigation or through a simple and relatively quick rotation.
 	
-	\begin{figure}[h]
+	\begin{figure}[h!]
 		\centering
 		\includegraphics[scale=0.1]{robot_a}
 		\caption{The LIDAR sensor and 3D-printed mounting point attached to Robot A}
@@ -46,7 +46,7 @@
 	\subsection{Hardware}
 	A 3D-printed mount was created for easy placement and adjustment of the LIDAR.
 	
-	\begin{figure}[h]
+	\begin{figure}[h!]
 		\centering
 		\includegraphics[scale=0.6]{lidar_mount}
 		\caption{CAD rendering of LIDAR mount}
@@ -57,8 +57,6 @@
 	
 	However, due to technical difficulties with move\_base, Robot A implements a wall following and corner detection algorithem. Five equally-spaced lines in front of the robot are sampled via LIDAR allowing it to maintain a constant distance to walls and to count and detect corners. Diffrerentiating between corners with right turns and left turns allow the robot to locate itself in a predefined map with uncertain wall lengths.\newline
 	
-	
-	
 	\pagebreak
 
 	\section{Robot B}
@@ -66,7 +64,7 @@
 	\subsection{Overview}
 	Robot B uses ultrasonic sensors mounted via aluminium frame to navigate its environment.
 	
-	\begin{figure}[h]
+	\begin{figure}[h!]
 		\centering
 		\includegraphics[scale=0.1]{robot_b_full}
 		\caption{Robot B with mounting frame, 3D-printed connectors, and ultrasonic sensors}
@@ -78,19 +76,21 @@
 	\subsection{Hardware}
 	An aluminium frame with 3D-printed connection points extends from the top mounting point to the bottom of the robot, allowing the sensors to attach to a low-enough point to read the walls of the maze.
 	
-	\begin{figure}[h]
+	\pagebreak
+	
+	\begin{figure}[h!]
 		\centering
 		\includegraphics[scale=0.1]{ultrasonic_mount}
 		\caption{Robot B with mounting frame, 3D-printed connectors, and ultrasonic sensors}
 	\end{figure}
 	
-	\begin{figure}[h]
+	\begin{figure}[h!]
 		\centering
 		\includegraphics[scale=0.5]{central_mount_empty}
 		\caption{Central mount for connection points}
 	\end{figure}
 
-	\begin{figure}[h]
+	\begin{figure}[h!]
 		\centering
 		\includegraphics[scale=0.5]{central_mount_conns}
 		\caption{Central mount with connections for ultrasonic sensors}
@@ -99,6 +99,6 @@
 	\pagebreak
 	
 	\subsection{Software}
-	DESCRIPTION OF SOFTWARE
+	Robot B follows a similar algorithem to the ideal case of Robot A. After being located by Robot A and having recieved the LIDAR map, Robot B uses a wall following and corner counting algorithem.
 	
 \end{document}
