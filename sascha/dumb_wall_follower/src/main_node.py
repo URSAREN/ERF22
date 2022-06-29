@@ -1,13 +1,13 @@
+
 import rospy 
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 from dumb_wall_follower.methods import *
 import tf
+from tf import TransformListener
 from tf.transformations import quaternion_from_euler
-from geometry_msgs.msg import Point, Quaternion, Pose
+from geometry_msgs.msg import  Pose, PoseStamped
 
-from tf2_geometry_msgs import PoseStamped
-import tf2_ros
 
 class Robot:
     def __init__(self):
@@ -16,6 +16,7 @@ class Robot:
         self.corner_map = np.asarray(rospy.get_param('~corner_map'))
         self.last_corner_id = None
         self.corner_automaton_state = None
+        self.current_goal = None
 
         self.max_linear_speed = rospy.get_param('~max_linear_speed')
         self.max_angular_speed = rospy.get_param('~max_angular_speed')
@@ -23,15 +24,35 @@ class Robot:
 
         self.angles_left_wall_follow = rospy.get_param('~angles_left_wall_follow')
         self.angles_right_wall_follow = rospy.get_param('~angles_right_wall_follow')
-        self.current_wall_location = 'left'
+        self.current_wall_location = 'right'
 
         self.tf_listener = tf.TransformListener()
         
-        
+        self.tf_listener= TransformListener()
         rospy.Subscriber(rospy.get_param('~laser_scan_topic'), LaserScan, self.test) # TODO: connect to main_structure
-        self.robot_mover = self.RobotMover()
+        self.robot_mover = self.RobotMover(self.tf_listener)
         rospy.spin()
+
+
+
+    def get_to_initial_position(self, laser_scan_msg):
+        # Check if oriented to the tunnel
+        while self.get_largest_distance(laser_scan_msg, left_border=60, right_border=-60)[0] >= 3.0: # Add as parameter
+            pose = self.point2pose([0,0], math.radians(10)) # rotate away from the tunnel
+            self.robot_mover.send_pose_to_move_base(pose, goal_pose_frame='base_link')
         
+        while -math.radians(3) < self.get_shortest_distance(laser_scan_msg, left_border=90, right_border=-90)[1] < math.radians(3): # Orient to the point
+            pose = self.point2pose([0,0], self.get_shortest_distance(laser_scan_msg, left_border=90, right_border=-90)[1])
+            self.robot_mover.send_pose_to_move_base(pose, goal_pose_frame='base_link') # incorrect tf for rotation calculation. But may go well
+
+        while self.get_shortest_distance(laser_scan_msg, left_border=5, right_border=-5)[0] >= self.distance_to_wall + 0.45: # Move to point
+            pose = self.point2pose([0.1,0], 0)
+            self.robot_mover.send_pose_to_move_base(pose, goal_pose_frame='base_link')
+
+        pose = self.point2pose([0,0], math.radians(-90))
+        self.robot_mover.send_pose_to_move_base(pose, goal_pose_frame='base_link') # may be an issue due to being published only once
+        
+
 
     def range_by_angle_from_laser_scan(self, laser_scan_msg, angle):
         """
@@ -78,12 +99,47 @@ class Robot:
         return dist_avg
 
 
+
+            
+
+
     def test(self, laser_scan_msg):
-        range, heading = self.get_shortest_distance(laser_scan_msg, left_border=100, right_border=-100)
-        print(f'Heading: {math.degrees(heading)}')
-        print(f'Distance: {range}')
-        # test_pose = self.error2pose(0, 0)
-        # self.robot_mover.send_pose_to_move_base(test_pose)
+        while self.get_shortest_distance(laser_scan_msg, left_border=15, right_border=-15) > self.distance_to_wall:
+            self.get_to_initial_position(laser_scan_msg)
+        
+        # print('######## ########### #########')
+        # range, heading = self.get_largest_distance(laser_scan_msg, left_border=60, right_border=30)
+        # print(f'Heading largest: {math.degrees(heading)}')
+        # print(f'Distance largest: {range}')
+
+        # range, heading = self.get_shortest_distance(laser_scan_msg, left_border=60, right_border=30)
+        # print(f'Heading smallest: {math.degrees(heading)}')
+        # print(f'Distance smallest: {range}')
+
+
+        # range, heading = self.get_shortest_distance(laser_scan_msg, left_border=100, right_border=-100)
+        # print(f'Heading: {math.degrees(heading)}')
+        # print(f'Distance: {range}')
+        # range -= 0.2
+        # coord = pol2cart(range, heading)
+        # print(f'Cartesian in laser frame: {coord}')
+        # pose = self.point2pose(coord, heading)
+        # print(f'Pose in laser: {pose}')
+        # self.current_goal = pose
+        # self.robot_mover.send_pose_to_move_base(self.current_goal, goal_pose_frame='laser')
+
+
+        d3_measured, d2_measured, d1_measured = self.measure_distances_to_wall(laser_scan_msg)
+        print('##### ###### ######')
+        print(f'Mesured d3: {d3_measured}')
+        print(f'Mesured d2: {d2_measured}')
+        print(f'Mesured d1: {d1_measured}')
+        lin_error, ang_error = self.calculate_position_error_laser_frame(d3_measured, d2_measured)
+        print(f'Linear error: {lin_error}')
+        print(f'Angular error: {ang_error}')
+        laser_pose = self.error2pose(lin_error, ang_error)
+        print(f'Laser pose: {laser_pose}')
+        self.robot_mover.send_pose_to_move_base(laser_pose, goal_pose_frame='laser')
 
 
 
@@ -249,14 +305,12 @@ class Robot:
             point_d3 = pol2cart(d3_measured, math.radians(self.angles_left_wall_follow[0]))
             point_d2 = pol2cart(d2_measured, math.radians(self.angles_left_wall_follow[1]))
             ang_d3_d2 = math.radians(self.angles_left_wall_follow[0] - self.angles_left_wall_follow[1])
-            print(f'Point d3: {point_d3}')
-            print(f'Point d2: {point_d2}')
             d2d3 = math.sqrt(d3_measured ** 2 + d2_measured ** 2 - 2 * d2_measured * d3_measured * math.cos(ang_d3_d2)) # cosine theorem
             if point_d3[1] >= point_d2[1]: # acute angle
                 alpha = math.asin(d2_measured * math.sin(ang_d3_d2) / d2d3) # sine theorem
             else: # obtuse angle
                 alpha = math.radians(180) - math.asin(d2_measured * math.sin(ang_d3_d2) / d2d3)
-            print(f'Alpha from sine theorem: {math.degrees(alpha)}')
+
             alpha -= math.radians(90)
             return alpha
 
@@ -264,19 +318,34 @@ class Robot:
             point_d3 = pol2cart(d3_measured, math.radians(self.angles_right_wall_follow[0]))
             point_d2 = pol2cart(d2_measured, math.radians(self.angles_right_wall_follow[1]))
             ang_d3_d2 = math.radians(self.angles_right_wall_follow[1] - self.angles_right_wall_follow[0])
-            print(f'Point d3: {point_d3}')
-            print(f'Point d2: {point_d2}')
             d2d3 = math.sqrt(d3_measured ** 2 + d2_measured ** 2 - 2 * d2_measured * d3_measured * math.cos(ang_d3_d2)) # cosine theorem
             if point_d3[1] <= point_d2[1]: # acute angle
                 alpha = math.asin(d2_measured * math.sin(ang_d3_d2) / d2d3) # sine theorem
             else: # obtuse angle
                 alpha = math.radians(180) - math.asin(d2_measured * math.sin(ang_d3_d2) / d2d3)
-            print(f'Alpha from sine theorem: {math.degrees(alpha)}')
             alpha = math.radians(90) - alpha
             return alpha
         
         else:
             raise NotImplementedError('False wall location was given. Only "right" or "left".')
+
+
+    def point2pose(self, point, heading):
+        x, y = point
+
+        my_pose = Pose()
+
+        my_pose.position.x = x
+        my_pose.position.y = y
+        my_pose.position.z = 0
+
+        q = quaternion_from_euler(0, 0, heading)
+        my_pose.orientation.x = q[0]
+        my_pose.orientation.y = q[1]
+        my_pose.orientation.z = q[2]
+        my_pose.orientation.w = q[3]
+
+        return my_pose
 
 
     def error2pose(self, linear_error, angular_error):
@@ -397,24 +466,59 @@ class Robot:
         angle_increment = float(laser_scan_msg.angle_increment)
         distances = np.asarray(laser_scan_msg.ranges)
 
-        angle_diff_left = math.radians(180 - left_border)
-        angle_diff_right = math.radians(180 - right_border)
+        angle_diff_left = math.radians(180 + left_border)
+        angle_diff_right = math.radians(180 + right_border)
 
         angle_id_left = int(angle_diff_left / angle_increment)
         angle_id_right = int(angle_diff_right / angle_increment)
 
-        min_range = min(distances[angle_id_left:angle_id_right])
-        min_id = np.argmin(distances[angle_id_left:angle_id_right]) + angle_id_left
-        min_angle = min_id * angle_increment - math.radians(180)
+        min_range = min(distances[angle_id_right:angle_id_left])
+        min_id = np.argmin(distances[angle_id_right:angle_id_left]) + angle_id_right
+        min_angle =  min_id * angle_increment - math.radians(180)
 
         return [min_range, min_angle]
 
 
-    class RobotMover:
-        def __init__(self):
-            self.goal_pose_publisher = rospy.Publisher(rospy.get_param('~publish_pose_to_topic'), PoseStamped, queue_size=10)
+    def get_largest_distance(self, laser_scan_msg, left_border=90, right_border=-90):
+        """
+        Determines the largest distance in the valid area in front of the robot
 
-        
+        :param laser_scan_msg: A LaserScan msg from lidar
+        :type laser_scan_msg: nav_msgs.LaserScan
+        :param left_border: left fov angle in [deg]
+        :type left_border: int
+        :param right_border: right fov angle in [deg]
+        :type right_border: int
+
+        return: distance and angle in [rad]
+
+        :rtype: list
+        """
+
+        angle_increment = float(laser_scan_msg.angle_increment)
+        distances = np.asarray(laser_scan_msg.ranges)
+        distances[distances == math.inf] = 0 # omit inf values for max search
+
+        angle_diff_left = math.radians(180 + left_border)
+        angle_diff_right = math.radians(180 + right_border)
+
+        angle_id_left = int(angle_diff_left / angle_increment)
+        angle_id_right = int(angle_diff_right / angle_increment)
+
+        max_range = max(distances[angle_id_right:angle_id_left])
+        max_id = np.argmax(distances[angle_id_right:angle_id_left]) + angle_id_right
+        max_angle =  max_id * angle_increment - math.radians(180)
+
+        return [max_range, max_angle]
+
+
+    class RobotMover:
+        def __init__(self, tf_listener):
+            self.goal_pose_publisher = rospy.Publisher(rospy.get_param('~publish_pose_to_topic'), PoseStamped, queue_size=10)
+            self.tf_listener = tf_listener
+            
+            
+     
         def send_pose_to_move_base(self, goal_pose, goal_pose_frame='laser'):
             """
             Sends pose to move_base to follow.
@@ -426,37 +530,19 @@ class Robot:
 
             """
 
-            my_pose_in_base = self.transform_pose(input_pose=goal_pose, from_frame=goal_pose_frame, to_frame='map')
+            goal_pose_stamped = PoseStamped()
+            goal_pose_stamped.header.frame_id = goal_pose_frame
+            # goal_pose_stamped.header.stamp = rospy.Time.now()
+            goal_pose_stamped.pose = goal_pose
 
-            pose_stamped = PoseStamped()
-
-            pose_stamped.header.frame_id = 'base_link'
-            pose_stamped.pose = my_pose_in_base
-
-            self.goal_pose_publisher.publish(pose_stamped)
-
-
-        @staticmethod
-        def transform_pose(input_pose, from_frame, to_frame):
-
-            # **Assuming /tf2 topic is being broadcasted
-            tf_buffer = tf2_ros.Buffer()
-            listener = tf2_ros.TransformListener(tf_buffer)
-
-            pose_stamped = PoseStamped()
-            pose_stamped.pose = input_pose
-            pose_stamped.header.frame_id = from_frame
-            pose_stamped.header.stamp = rospy.Time.now()
-
-            try:
-                # ** It is important to wait for the listener to start listening. Hence the rospy.Duration(1)
-                output_pose_stamped = tf_buffer.transform(pose_stamped, to_frame, rospy.Duration(1))
-                return output_pose_stamped.pose
-
-            except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
-                pass
-
+            my_pose_in_base = self.tf_listener.transformPose("map", goal_pose_stamped)
             
+            print(f'Publishing pose: {my_pose_in_base} \n')
+            print(f'Publishing to {rospy.get_param("~publish_pose_to_topic")}')
+
+            self.goal_pose_publisher.publish(my_pose_in_base)
+            
+
 
 if __name__ == '__main__':
     robotA = Robot()

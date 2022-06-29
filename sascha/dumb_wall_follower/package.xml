@@ -13,8 +13,8 @@
   <build_depend>sensor_msgs</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>tf</build_depend>
-  <build_depend>tf2_geometry_msgs</build_depend>
-  <build_depend>tf2_ros</build_depend>
+  <!-- <build_depend>tf2_geometry_msgs</build_depend> -->
+  <!-- <build_depend>tf2_ros</build_depend> -->
   <build_export_depend>laser_geometry</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
   <build_export_depend>sensor_msgs</build_export_depend>
@@ -24,8 +24,8 @@
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>tf</exec_depend>
-  <exec_depend>tf2_geometry_msgs</exec_depend>
-  <exec_depend>tf2_ros</exec_depend>
+  <!-- <exec_depend>tf2_geometry_msgs</exec_depend> -->
+  <!-- <exec_depend>tf2_ros</exec_depend> -->
 
 
 

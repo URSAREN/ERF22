@@ -1,0 +1,45 @@
+<launch>
+
+    <!-- Transformation Configuration ... Setting Up the Relationships Between Coordinate Frames --> 
+    <node pkg="tf" type="static_transform_publisher" name="hector_estimated_frame_to_odom" args="0 0 0 0 0 0 hector_estimated_frame odom 30" />
+    <node pkg="tf" type="static_transform_publisher" name="odom_to_base_link" args="0 0 0 0 0 0 odom base_link 30" />
+    <node pkg="tf" type="static_transform_publisher" name="base_link_to_laser" args="0.45 0 0.0 0 0 0 base_link base_scan 30" />
+
+    <include file="$(find turtlebot3_gazebo)/launch/turtlebot3_house.launch">
+    </include>
+
+
+    <node pkg="hector_mapping" type="hector_mapping" name="hector_mapping" output="screen">
+        <param name="map_frame" value="map" />
+        <param name="map_update_distance_thresh" value="0.1" />
+        <param name="map_update_angle_thresh" value="0.1" />
+        <param name="map_pub_period" value="1.0" />
+        <param name="laser_min_dist" value="0.05" />
+        <param name="laser_max_dist" value="12.0" />
+        <param name="tf_map_scanmatch_transform_frame_name" value="hector_estimated_frame" />
+    </node>
+    
+
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+        <rosparam file="$(find dumb_wall_follower)/param/costmap_common_params.yaml" command="load" ns="global_costmap" />
+        <rosparam file="$(find dumb_wall_follower)/param/costmap_common_params.yaml" command="load" ns="local_costmap" />
+        <rosparam file="$(find dumb_wall_follower)/param/local_costmap_params.yaml" command="load" ns="local_costmap" />
+        <rosparam file="$(find dumb_wall_follower)/param/global_costmap_params.yaml" command="load" ns="global_costmap" />
+        <rosparam file="$(find dumb_wall_follower)/param/base_local_planner_params.yaml" command="load" />
+    </node>
+
+    
+    <node pkg="dumb_wall_follower" name="main_node" type="main_node.py" output="screen">
+        <rosparam file="$(find dumb_wall_follower)/param/Robot_A_params.yaml" command='load'/>
+    </node>
+
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find dumb_wall_follower)/rviz/see_all.rviz" /> 
+
+    <!-- <node pkg="dumb_wall_follower" name="init_pose_publisher" type="init_pose_publisher.py" output="screen">
+        <rosparam file="$(find dumb_wall_follower)/param/Robot_A_params.yaml" command='load'/> 
+    </node> -->
+
+    
+    
+
+</launch>
