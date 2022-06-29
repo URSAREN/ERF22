@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/W32TeX) (preloaded format=pdflatex 2022.5.11)  29 JUN 2022 13:40
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/W32TeX) (preloaded format=pdflatex 2022.5.11)  29 JUN 2022 16:09
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -119,67 +119,90 @@ File: ./images/robot_a.jpg Graphic file (type jpg)
 <use ./images/robot_a.jpg>
 Package pdftex.def Info: ./images/robot_a.jpg  used on input line 37.
 (pdftex.def)             Requested size: 327.64319pt x 245.73239pt.
-[1
 
-{c:/texlive/2020/texmf-var/fonts/map/pdftex/updmap/pdftex.map} <./images/robot_
-a.jpg>]
-<./images/lidar_mount.png, id=11, 530.48187pt x 365.86688pt>
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 42--43
+
+ []
+
+<./images/lidar_mount.png, id=2, 530.48187pt x 365.86688pt>
 File: ./images/lidar_mount.png Graphic file (type png)
 <use ./images/lidar_mount.png>
-Package pdftex.def Info: ./images/lidar_mount.png  used on input line 49.
+Package pdftex.def Info: ./images/lidar_mount.png  used on input line 51.
 (pdftex.def)             Requested size: 318.29156pt x 219.52182pt.
- [2 <./images/lidar_mount.PNG>]
-<./images/robot_b_full.jpg, id=17, 2071.74pt x 2428.07124pt>
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 56--57
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 58--59
+
+ []
+
+[1
+
+{c:/texlive/2020/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2 <./images/ro
+bot_a.jpg>]
+<./images/robot_b_full.jpg, id=16, 2071.74pt x 2428.07124pt>
 File: ./images/robot_b_full.jpg Graphic file (type jpg)
 <use ./images/robot_b_full.jpg>
-Package pdftex.def Info: ./images/robot_b_full.jpg  used on input line 65.
+Package pdftex.def Info: ./images/robot_b_full.jpg  used on input line 71.
 (pdftex.def)             Requested size: 207.18613pt x 242.82135pt.
-<./images/ultrasonic_mount.jpg, id=18, 3276.24pt x 2457.18pt>
-File: ./images/ultrasonic_mount.jpg Graphic file (type jpg)
-<use ./images/ultrasonic_mount.jpg>
-Package pdftex.def Info: ./images/ultrasonic_mount.jpg  used on input line 77.
-(pdftex.def)             Requested size: 327.64319pt x 245.73239pt.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<./images/central_mount_empty.png, id=19, 410.03188pt x 273.52188pt>
+<./images/ultrasonic_mount.jpg, id=17, 3276.24pt x 2457.18pt>
+File: ./images/ultrasonic_mount.jpg Graphic file (type jpg)
+<use ./images/ultrasonic_mount.jpg>
+Package pdftex.def Info: ./images/ultrasonic_mount.jpg  used on input line 83.
+(pdftex.def)             Requested size: 327.64319pt x 245.73239pt.
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+<./images/central_mount_empty.png, id=18, 410.03188pt x 273.52188pt>
 File: ./images/central_mount_empty.png Graphic file (type png)
 <use ./images/central_mount_empty.png>
 Package pdftex.def Info: ./images/central_mount_empty.png  used on input line 8
-3.
+9.
 (pdftex.def)             Requested size: 205.01543pt x 136.7606pt.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<./images/central_mount_conns.png, id=20, 561.59813pt x 354.82562pt>
+<./images/central_mount_conns.png, id=19, 561.59813pt x 354.82562pt>
 File: ./images/central_mount_conns.png Graphic file (type png)
 <use ./images/central_mount_conns.png>
-Package pdftex.def Info: ./images/central_mount_conns.png  used on input line 8
-9.
+Package pdftex.def Info: ./images/central_mount_conns.png  used on input line 9
+5.
 (pdftex.def)             Requested size: 280.79837pt x 177.41237pt.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-[3 <./images/robot_b_full.jpg>] [4 <./images/ultrasonic_mount.jpg> <./images/ce
-ntral_mount_empty.PNG>] [5 <./images/central_mount_conns.PNG>] (./doc.aux) ) 
+[3 <./images/lidar_mount.PNG>] [4 <./images/robot_b_full.jpg>] [5 <./images/ult
+rasonic_mount.jpg> <./images/central_mount_empty.PNG>] [6 <./images/central_mou
+nt_conns.PNG>] (./doc.aux) ) 
 Here is how much of TeX's memory you used:
- 1302 strings out of 480608
- 19380 string characters out of 5907536
- 254560 words of memory out of 5000000
- 17226 multiletter control sequences out of 15000+600000
+ 1303 strings out of 480608
+ 19398 string characters out of 5907536
+ 256560 words of memory out of 5000000
+ 17227 multiletter control sequences out of 15000+600000
  536585 words of font info for 38 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 30i,6n,26p,278b,217s stack positions out of 5000i,500n,10000p,200000b,80000s
-<c:
-/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb><c:/texlive/
-2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><c:/texlive/2020/texmf
--dist/fonts/type1/public/amsfonts/cm/cmr12.pfb><c:/texlive/2020/texmf-dist/font
-s/type1/public/amsfonts/cm/cmr17.pfb>
-Output written on doc.pdf (5 pages, 6957091 bytes).
+ 30i,6n,26p,465b,217s stack positions out of 5000i,500n,10000p,200000b,80000s
+<c:/texlive/2020/texmf-dist/fonts/type1/public/amsf
+onts/cm/cmbx12.pfb><c:/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/c
+mr10.pfb><c:/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb><
+c:/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb>
+Output written on doc.pdf (6 pages, 6959122 bytes).
 PDF statistics:
- 46 PDF objects out of 1000 (max. 8388607)
- 25 compressed objects within 1 object stream
+ 49 PDF objects out of 1000 (max. 8388607)
+ 27 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  31 words of extra memory for PDF output out of 10000 (max. 10000000)
 

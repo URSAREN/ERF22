@@ -23,14 +23,14 @@
 	
 	\section{Abstract}
 	
-	Our solution to the LELY Challenge consists of a team of asymmetrical robots. Robot A navigates and maps its environment with use of a 2D LIDAR system. Robot B recieves a map of the environment from Robot A and then uses its 3 ultrasonic sensors to navigate. \newline
+	Our solution to the LELY Challenge consists of a team of asymmetrical robots implemented in ROS. Robot A navigates and maps its environment with use of a 2D LIDAR system. Robot B recieves a map of the environment and location data from Robot A and then uses its 3 ultrasonic sensors to navigate. \newline
 	
 	This document provides an outline of the design of the systems and the thought process behind their development.	
 	
 	\section{Robot A}
 	
 	\subsection{Overview}
-	Robot A is a LIDAR-capable platform. Due to the walls of the challenge being only 37cm tall, the mounting point of the LIDAR is on the bottom front of the chasis, providing a 200 degree field of view. 
+	Robot A is a LIDAR-capable platform. Due to the walls of the challenge being only 37cm tall, the mounting point of the LIDAR is on the bottom front of the chasis, providing a 200 degree field of view. The restricted point of view is overcome through the natural turning of the robot during navigation.
 	
 	\begin{figure}[h]
 		\centering
@@ -52,8 +52,12 @@
 		\caption{CAD rendering of LIDAR mount}
 	\end{figure}
 	
-	\subsection{Software}	
-	Robot A implements a wall following algorithem. Five equally-spaced lines in front of the robot are sampled via LIDAR.
+	\subsection{Software}
+	The A1M8-R6 LIDAR comes with ROS packages which allow for SLAM mapping without odometry information up to 12 meters. An ideal navigation stack for Robot A would be to use the gmapping ROS package to generate a cost map, allowing for the robot to be steered via the ROS move\_base package. \newline
+	
+	However, due to technical difficulties with move\_base, Robot A implements a wall following and corner detection algorithem. Five equally-spaced lines in front of the robot are sampled via LIDAR allowing it to maintain a constant distance to walls and to count and detect corners. Diffrerentiating between corners with right turns and left turns allow the robot to locate itself in a predefined map with uncertain wall lengths.\newline
+	
+	
 	
 	\pagebreak
 
