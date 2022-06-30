@@ -42,6 +42,9 @@
         <rosparam file="$(find dumb_wall_follower)/param/Robot_A_params.yaml" command='load'/>
     </node>
 
+    <node pkg="dumb_wall_follower" name="lamps_node" type="lamps_node.py" output="screen">
+    </node>
+
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find dumb_wall_follower)/rviz/see_all.rviz" />
 
     <!-- <node pkg="dumb_wall_follower" name="init_pose_publisher" type="init_pose_publisher.py" output="screen">

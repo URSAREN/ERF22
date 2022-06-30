@@ -5,7 +5,7 @@ from geometry_msgs.msg import Twist
 from dumb_wall_follower.methods import *
 import tf
 from tf import TransformListener
-from tf.transformations import quaternion_from_euler
+from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from geometry_msgs.msg import  Pose, PoseStamped
 
 
@@ -17,42 +17,91 @@ class Robot:
         self.last_corner_id = None
         self.corner_automaton_state = None
         self.current_goal = None
+        self.current_pose = PoseStamped()
+        self.task_id = 0
+        self.last_yaw = 0
 
+        self.robot_radius = rospy.get_param('~robot_radius')
         self.max_linear_speed = rospy.get_param('~max_linear_speed')
         self.max_angular_speed = rospy.get_param('~max_angular_speed')
         self.distance_to_wall = rospy.get_param('~room_distance_to_wall')
 
         self.angles_left_wall_follow = rospy.get_param('~angles_left_wall_follow')
         self.angles_right_wall_follow = rospy.get_param('~angles_right_wall_follow')
-        self.current_wall_location = 'right'
+        self.current_wall_location = 'left'
 
         self.tf_listener = tf.TransformListener()
         
         self.tf_listener= TransformListener()
         rospy.Subscriber(rospy.get_param('~laser_scan_topic'), LaserScan, self.test) # TODO: connect to main_structure
+        rospy.Subscriber('/slam_out_pose', PoseStamped, self.update_self_position) 
         self.robot_mover = self.RobotMover(self.tf_listener)
         rospy.spin()
 
 
+    def get_to_initial_position_cmd_vel(self, laser_scan_msg):
+        cmd_vel_publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
 
-    def get_to_initial_position(self, laser_scan_msg):
+        # while cmd_vel_publisher.get_num_connections() < 1: # ensures that message will be received.
+        #     print('Waiting for subsciber on /cmd_vel')
+
         # Check if oriented to the tunnel
-        while self.get_largest_distance(laser_scan_msg, left_border=60, right_border=-60)[0] >= 3.0: # Add as parameter
-            pose = self.point2pose([0,0], math.radians(10)) # rotate away from the tunnel
-            self.robot_mover.send_pose_to_move_base(pose, goal_pose_frame='base_link')
+        if self.task_id == 0:
+            if self.get_largest_distance(laser_scan_msg, left_border=60, right_border=-60)[0] >= 5.0: # Add as parameter
+                twist_msg = Twist()
+                twist_msg.linear.x = 0.0
+                twist_msg.angular.z = 0.1
+                cmd_vel_publisher.publish(twist_msg)
+            else:
+                twist_msg = Twist()
+                twist_msg.linear.x = 0.0
+                twist_msg.angular.z = 0.0
+                cmd_vel_publisher.publish(twist_msg)
+                self.task_id = 1
+
+        if self.task_id == 1:
+            if not  -math.radians(3) < self.get_shortest_distance(laser_scan_msg, left_border=90, right_border=-90)[1] < math.radians(3): # Orient to the point
+                twist_msg = Twist()
+                twist_msg.linear.x = 0.0
+                twist_msg.angular.z = self.get_shortest_distance(laser_scan_msg, left_border=90, right_border=-90)[1]
+                cmd_vel_publisher.publish(twist_msg)
+            else:
+                twist_msg = Twist()
+                twist_msg.linear.x = 0.0
+                twist_msg.angular.z = 0.0
+                cmd_vel_publisher.publish(twist_msg)
+                self.task_id = 2
+
+        if self.task_id == 2:
+            if self.get_shortest_distance(laser_scan_msg, left_border=5, right_border=-5)[0] >= self.distance_to_wall + self.robot_radius: # Move to point
+                twist_msg = Twist()
+                twist_msg.linear.x = 0.1
+                twist_msg.angular.z = 0.0
+                cmd_vel_publisher.publish(twist_msg)
+                self.last_yaw = euler_from_quaternion([self.current_pose.pose.orientation.x, self.current_pose.pose.orientation.y, 
+                self.current_pose.pose.orientation.z, self.current_pose.pose.orientation.w])[2]
+            else:
+                twist_msg = Twist()
+                twist_msg.linear.x = 0.0
+                twist_msg.angular.z = 0.0
+                cmd_vel_publisher.publish(twist_msg)
+                self.task_id = 3
+            
+        if self.task_id == 3: # Most likely to fail due to unreliable estimation from hector_mapping
+            current_yaw = euler_from_quaternion([self.current_pose.pose.orientation.x, self.current_pose.pose.orientation.y, 
+                self.current_pose.pose.orientation.z, self.current_pose.pose.orientation.w])[2]
+            if not math.radians(87) < self.last_yaw - current_yaw < math.radians(93): # get parallel to a wall
+                twist_msg = Twist()
+                twist_msg.linear.x = 0.0
+                twist_msg.angular.z = -0.1
+                cmd_vel_publisher.publish(twist_msg)
+            else:
+                twist_msg = Twist()
+                twist_msg.linear.x = 0.0
+                twist_msg.angular.z = 0.0
+                cmd_vel_publisher.publish(twist_msg)
+                self.task_id = 4
         
-        while -math.radians(3) < self.get_shortest_distance(laser_scan_msg, left_border=90, right_border=-90)[1] < math.radians(3): # Orient to the point
-            pose = self.point2pose([0,0], self.get_shortest_distance(laser_scan_msg, left_border=90, right_border=-90)[1])
-            self.robot_mover.send_pose_to_move_base(pose, goal_pose_frame='base_link') # incorrect tf for rotation calculation. But may go well
-
-        while self.get_shortest_distance(laser_scan_msg, left_border=5, right_border=-5)[0] >= self.distance_to_wall + 0.45: # Move to point
-            pose = self.point2pose([0.1,0], 0)
-            self.robot_mover.send_pose_to_move_base(pose, goal_pose_frame='base_link')
-
-        pose = self.point2pose([0,0], math.radians(-90))
-        self.robot_mover.send_pose_to_move_base(pose, goal_pose_frame='base_link') # may be an issue due to being published only once
-        
-
 
     def range_by_angle_from_laser_scan(self, laser_scan_msg, angle):
         """
@@ -98,47 +147,26 @@ class Robot:
 
         return dist_avg
 
-
-
             
+    def update_self_position(self, pose_msg):
+        self.current_pose = pose_msg
 
 
     def test(self, laser_scan_msg):
-        while self.get_shortest_distance(laser_scan_msg, left_border=15, right_border=-15) > self.distance_to_wall:
-            self.get_to_initial_position(laser_scan_msg)
-        
-        # print('######## ########### #########')
-        # range, heading = self.get_largest_distance(laser_scan_msg, left_border=60, right_border=30)
-        # print(f'Heading largest: {math.degrees(heading)}')
-        # print(f'Distance largest: {range}')
+        print(f'Current task id: {self.task_id}')
+        current_yaw = euler_from_quaternion([self.current_pose.pose.orientation.x, self.current_pose.pose.orientation.y, 
+            self.current_pose.pose.orientation.z, self.current_pose.pose.orientation.w])[2]
 
-        # range, heading = self.get_shortest_distance(laser_scan_msg, left_border=60, right_border=30)
-        # print(f'Heading smallest: {math.degrees(heading)}')
-        # print(f'Distance smallest: {range}')
-
-
-        # range, heading = self.get_shortest_distance(laser_scan_msg, left_border=100, right_border=-100)
-        # print(f'Heading: {math.degrees(heading)}')
-        # print(f'Distance: {range}')
-        # range -= 0.2
-        # coord = pol2cart(range, heading)
-        # print(f'Cartesian in laser frame: {coord}')
-        # pose = self.point2pose(coord, heading)
-        # print(f'Pose in laser: {pose}')
-        # self.current_goal = pose
-        # self.robot_mover.send_pose_to_move_base(self.current_goal, goal_pose_frame='laser')
+        print(f'Current yaw: {math.degrees(current_yaw)}')
+        # self.get_to_initial_position_cmd_vel(laser_scan_msg)
 
 
         d3_measured, d2_measured, d1_measured = self.measure_distances_to_wall(laser_scan_msg)
-        print('##### ###### ######')
-        print(f'Mesured d3: {d3_measured}')
-        print(f'Mesured d2: {d2_measured}')
-        print(f'Mesured d1: {d1_measured}')
+
         lin_error, ang_error = self.calculate_position_error_laser_frame(d3_measured, d2_measured)
         print(f'Linear error: {lin_error}')
         print(f'Angular error: {ang_error}')
         laser_pose = self.error2pose(lin_error, ang_error)
-        print(f'Laser pose: {laser_pose}')
         self.robot_mover.send_pose_to_move_base(laser_pose, goal_pose_frame='laser')
 
 
@@ -272,13 +300,13 @@ class Robot:
             point_d2 = pol2cart(d2_measured, math.radians(self.angles_left_wall_follow[1]))
             d2d3 = [point_d3, point_d2] 
             _, real_distance = project_point_on_line([0, 0], d2d3)
-            linear_error = real_distance - self.distance_to_wall
+            linear_error = real_distance - self.distance_to_wall - self.robot_radius
         elif self.current_wall_location == 'right':
             point_d3 = pol2cart(d3_measured, math.radians(self.angles_right_wall_follow[0]))
             point_d2 = pol2cart(d2_measured, math.radians(self.angles_right_wall_follow[1]))
             d2d3 = [point_d3, point_d2] 
             _, real_distance = project_point_on_line([0, 0], d2d3)
-            linear_error = self.distance_to_wall - real_distance
+            linear_error = self.distance_to_wall + self.robot_radius - real_distance
 
 
         angular_error = self.calculate_relative_angle_to_wall(d3_measured, d2_measured) # angle should be 0

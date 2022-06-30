@@ -4,9 +4,9 @@ corner_map : [[-90, 0], [-90, 0], [90, 'auto_computed_corner'], [90, 'auto_compu
 
 max_linear_speed: 0.2 # m/s
 max_angular_speed: 0.07 # rad/s
-room_distance_to_wall: 0.5 # m
+room_distance_to_wall: 0.1 # m
 tunnel_distance_to_wall: 0.2 # m
-
+robot_radius: 0.15
 angles_left_wall_follow: [90, 60, 0] # d3, d2, d1 in deg
 angles_right_wall_follow: [-90, -60, 0] # d3, d2, d1 in deg
 
