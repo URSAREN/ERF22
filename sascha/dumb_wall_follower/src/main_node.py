@@ -158,16 +158,22 @@ class Robot:
             self.current_pose.pose.orientation.z, self.current_pose.pose.orientation.w])[2]
 
         print(f'Current yaw: {math.degrees(current_yaw)}')
-        # self.get_to_initial_position_cmd_vel(laser_scan_msg)
+        self.get_to_initial_position_cmd_vel(laser_scan_msg)
 
+        if self.task_id == 4:
+            d3_measured, d2_measured, d1_measured = self.measure_distances_to_wall(laser_scan_msg)
+            if d1_measured >= 0.9 * (self.distance_to_wall): # move along the wall
+                d3_measured, d2_measured, d1_measured = self.measure_distances_to_wall(laser_scan_msg)
 
-        d3_measured, d2_measured, d1_measured = self.measure_distances_to_wall(laser_scan_msg)
-
-        lin_error, ang_error = self.calculate_position_error_laser_frame(d3_measured, d2_measured)
-        print(f'Linear error: {lin_error}')
-        print(f'Angular error: {ang_error}')
-        laser_pose = self.error2pose(lin_error, ang_error)
-        self.robot_mover.send_pose_to_move_base(laser_pose, goal_pose_frame='laser')
+                lin_error, ang_error = self.calculate_position_error_laser_frame(d3_measured, d2_measured)
+                print(f'Linear error: {lin_error}')
+                print(f'Angular error: {ang_error}')
+                laser_pose = self.error2pose(lin_error, ang_error)
+                self.robot_mover.send_pose_to_move_base(laser_pose, goal_pose_frame='laser')
+            else:
+                null_pose = self.error2pose(0, 0)
+                self.robot_mover.send_pose_to_move_base(null_pose, goal_pose_frame='base_link')
+                self.task_id = 5
 
 
 
